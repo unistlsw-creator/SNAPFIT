@@ -1,0 +1,64 @@
+{
+  "boards": [
+    {
+      "name": "정사각형_보드",
+      "file": "asset/board/정사각형_보드.dxf"
+    },
+    {
+      "name": "정육각형_보드",
+      "file": "asset/board/정육각형_보드.dxf"
+    },
+    {
+      "name": "정팔각형_보드",
+      "file": "asset/board/정팔각형_보드.dxf"
+    }
+  ],
+  "obstacles": [
+    {
+      "name": "장애물_1",
+      "file": "asset/obstacle/장애물_1.dxf"
+    },
+    {
+      "name": "장애물_2",
+      "file": "asset/obstacle/장애물_2.dxf"
+    },
+    {
+      "name": "장애물_3",
+      "file": "asset/obstacle/장애물_3.dxf"
+    },
+    {
+      "name": "장애물_4",
+      "file": "asset/obstacle/장애물_4.dxf"
+    }
+  ],
+  "tiles": [
+    {
+      "name": "정사각형_타일",
+      "file": "asset/tile/정사각형_타일.dxf"
+    },
+    {
+      "name": "정삼각형_타일",
+      "file": "asset/tile/정삼각형_타일.dxf"
+    },
+    {
+      "name": "정오각형_타일",
+      "file": "asset/tile/정오각형_타일.dxf"
+    },
+    {
+      "name": "정육각형_타일",
+      "file": "asset/tile/정육각형_타일.dxf"
+    },
+    {
+      "name": "정팔각형_타일",
+      "file": "asset/tile/정팔각형_타일.dxf"
+    },
+    {
+      "name": "평행사변형_타일",
+      "file": "asset/tile/평행사변형_타일.dxf"
+    },
+    {
+      "name": "등변사다리꼴_타일",
+      "file": "asset/tile/등변사다리꼴_타일.dxf"
+    }
+  ]
+}

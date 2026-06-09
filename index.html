@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SNAPFIT</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <div class="title">SNAPFIT</div>
+      <div class="subtitle">다각형 타일 전략 프로토타입</div>
+    </header>
+    <main class="app-main">
+      <div class="board-wrap">
+        <canvas id="boardCanvas"></canvas>
+        <div id="statusBar" class="status-bar">준비됨.</div>
+      </div>
+      <aside class="side-panel">
+        <details class="panel" id="setupPanel" open>
+          <summary><h2>설정</h2></summary>
+          <div class="field">
+            <label for="boardSelect">보드</label>
+            <select id="boardSelect">
+              <option value="square">정사각형</option>
+              <option value="hexagon">정육각형</option>
+              <option value="octagon">정팔각형</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="modeSelect">모드</label>
+            <select id="modeSelect">
+              <option value="classic">클래식</option>
+              <option value="bridge">브릿지</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="playerCountSelect">플레이어 수</label>
+            <select id="playerCountSelect">
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4" selected>4</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="startPlayerSelect">시작 플레이어</label>
+            <select id="startPlayerSelect"></select>
+          </div>
+          <div class="field buttons">
+            <button id="startSetupBtn">설정 시작</button>
+            <button id="startGameBtn" disabled>게임 시작</button>
+            <button id="resetBtn">초기화</button>
+          </div>
+          <div class="field">
+            <label for="rotAngleSlider" title="Shift+마우스 휠 회전 각도">회전 각도: <span id="rotAngleVal">5°</span></label>
+            <input type="range" id="rotAngleSlider" min="1" max="15" step="1" value="5">
+          </div>
+          <div id="setupHint" class="hint"></div>
+        </details>
+
+        <details class="panel" id="obstaclePanel" open>
+          <summary><h2>장애물</h2></summary>
+          <div id="obstacleList" class="list"></div>
+          <div class="field buttons">
+            <button id="clearObstaclesBtn" disabled>장애물 모두 지우기</button>
+          </div>
+          <div class="hint">장애물을 선택한 뒤 보드를 클릭해 배치하세요. 드래그로 이동합니다. Delete로 제거합니다.</div>
+        </details>
+
+        <details class="panel" id="turnPanel" open>
+          <summary><h2>턴</h2></summary>
+          <div id="turnInfo" class="info">시작되지 않음.</div>
+          <div class="field buttons">
+            <button id="placeNeutralBtn" disabled>중립 타일 놓기</button>
+            <button id="connectGroupBtn" disabled>타일 그룹 연결</button>
+            <button id="passBtn" disabled>패스</button>
+            <button id="endTurnBtn" disabled>턴 종료</button>
+          </div>
+          <div class="hint">단축키: Esc 배치 취소. 마우스 Shift+휠 회전.</div>
+        </details>
+
+        <details class="panel" id="inventoryPanel" open>
+          <summary><h2>보유 타일</h2></summary>
+          <div id="inventoryList" class="list"></div>
+        </details>
+
+        <details class="panel" id="logPanel" open>
+          <summary><h2>로그</h2></summary>
+          <div id="logList" class="log"></div>
+        </details>
+      </aside>
+    </main>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html>
