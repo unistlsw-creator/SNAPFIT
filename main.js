@@ -30,7 +30,6 @@
     boardType: 'square',
     mode: 'classic',
     playerCount: 4,
-    startPlayerIndex: 0,
     board: null,
     assetsReady: false,
     assets: { boards: {}, tiles: {}, obstacles: {} },
@@ -67,7 +66,6 @@
   function init() {
     cacheUi();
     bindUi();
-    updateStartPlayerOptions();
     updateUiState();
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
@@ -94,7 +92,6 @@
     ui.boardSelect = document.getElementById('boardSelect');
     ui.modeSelect = document.getElementById('modeSelect');
     ui.playerCountSelect = document.getElementById('playerCountSelect');
-    ui.startPlayerSelect = document.getElementById('startPlayerSelect');
     ui.startSetupBtn = document.getElementById('startSetupBtn');
     ui.startGameBtn = document.getElementById('startGameBtn');
     ui.resetBtn = document.getElementById('resetBtn');
@@ -122,11 +119,6 @@
 
     ui.playerCountSelect.addEventListener('change', () => {
       state.playerCount = parseInt(ui.playerCountSelect.value, 10);
-      updateStartPlayerOptions();
-    });
-
-    ui.startPlayerSelect.addEventListener('change', () => {
-      state.startPlayerIndex = parseInt(ui.startPlayerSelect.value, 10);
     });
 
     ui.startSetupBtn.addEventListener('click', startSetup);
@@ -171,20 +163,6 @@
     window.addEventListener('keydown', onKeyDown);
   }
 
-  function updateStartPlayerOptions() {
-    const count = parseInt(ui.playerCountSelect.value, 10);
-    ui.startPlayerSelect.innerHTML = '';
-    for (let i = 0; i < count; i += 1) {
-      const option = document.createElement('option');
-      option.value = String(i);
-      option.textContent = `플레이어 ${i + 1}`;
-      ui.startPlayerSelect.appendChild(option);
-    }
-    const nextIndex = Math.min(state.startPlayerIndex, count - 1);
-    ui.startPlayerSelect.value = String(nextIndex);
-    state.startPlayerIndex = nextIndex;
-  }
-
   function updateBoardLabels() {
     if (!ui.boardSelect) {
       return;
@@ -221,6 +199,7 @@
     state.regionSelectIndex = 0;
     state.regionOrder = [];
     state.obstaclePool = {};
+    if (ui.startGameBtn) ui.startGameBtn.textContent = '게임 시작';
     updateUiState();
     setStatus('설정 옵션을 선택한 뒤 설정 시작을 누르세요.');
     appendLog('초기화했습니다.');
@@ -235,7 +214,6 @@
     state.boardType = ui.boardSelect.value;
     state.mode = ui.modeSelect.value;
     state.playerCount = parseInt(ui.playerCountSelect.value, 10);
-    state.startPlayerIndex = parseInt(ui.startPlayerSelect.value, 10);
     state.board = buildBoard(state.boardType);
     if (!state.board) {
       setStatus('보드 에셋을 불러오지 못했습니다.');
@@ -243,23 +221,36 @@
     }
     updateViewScale();
     state.players = buildPlayers(state.playerCount);
-    state.turnOrder = buildTurnOrder(state.playerCount, state.startPlayerIndex);
+    state.turnOrder = buildTurnOrder(state.playerCount);
     state.regionOrder = [...state.turnOrder].reverse();
     state.phase = 'setup';
-    state.setupStep = 'regions';
+    state.setupStep = 'obstacles';
     state.regionSelectIndex = 0;
     state.obstaclePool = initObstaclePool();
+    if (ui.startGameBtn) ui.startGameBtn.textContent = '영역 지정';
     updateUiState();
-    setStatus('영역 지정: 보드의 부채꼴 영역을 클릭하세요.');
-    appendLog('설정을 시작했습니다.');
+    setStatus('장애물을 배치한 뒤 영역 지정을 누르세요.');
+    appendLog('설정을 시작했습니다. 먼저 장애물을 배치하세요.');
   }
 
   function startGame() {
-    if (state.phase !== 'setup' || state.setupStep !== 'obstacles') {
+    if (state.phase !== 'setup') {
+      return;
+    }
+    if (state.setupStep === 'obstacles') {
+      state.setupStep = 'regions';
+      state.selectedObstacleTypeId = null;
+      if (ui.startGameBtn) ui.startGameBtn.textContent = '게임 시작';
+      updateUiState();
+      setStatus('영역 지정: 보드의 부채꼴 영역을 클릭하세요.');
+      appendLog('장애물 배치를 완료하고 영역 지정을 시작합니다.');
+      return;
+    }
+    if (state.setupStep !== 'ready') {
       return;
     }
     if (!allPlayersHaveRegions()) {
-      setStatus('먼저 영역을 지정하세요.');
+      setStatus('먼저 모든 영역을 지정하세요.');
       return;
     }
     state.tiles = [];
@@ -496,7 +487,7 @@
     const assetsReady = state.assetsReady;
 
     ui.startSetupBtn.disabled = !assetsReady || inSetup || inPlay;
-    ui.startGameBtn.disabled = !assetsReady || !(inSetup && state.setupStep === 'obstacles');
+    ui.startGameBtn.disabled = !assetsReady || !(inSetup && (state.setupStep === 'obstacles' || state.setupStep === 'ready'));
     ui.clearObstaclesBtn.disabled = !assetsReady || !(inSetup && state.setupStep === 'obstacles');
     ui.placeNeutralBtn.disabled = !inPlay || state.actionUsed || !canPlaceNeutral();
     ui.connectGroupBtn.disabled = !inPlay || state.actionUsed || !canConnectGroups();
@@ -513,14 +504,18 @@
       ui.setupHint.textContent = '설정 옵션을 선택한 뒤 설정 시작을 누르세요.';
       return;
     }
+    if (state.setupStep === 'obstacles') {
+      ui.setupHint.textContent = '장애물을 배치한 뒤 영역 지정을 누르세요.';
+      return;
+    }
     if (state.setupStep === 'regions') {
       const playerId = state.regionOrder[state.regionSelectIndex];
       const player = state.players[playerId];
       ui.setupHint.textContent = `${player.name} 영역을 지정하세요 (역순).`;
       return;
     }
-    if (state.setupStep === 'obstacles') {
-      ui.setupHint.textContent = '장애물을 배치한 뒤 게임 시작을 누르세요.';
+    if (state.setupStep === 'ready') {
+      ui.setupHint.textContent = '영역 지정이 완료되었습니다. 게임 시작을 누르세요.';
       return;
     }
     ui.setupHint.textContent = '';
@@ -679,10 +674,10 @@
     return players;
   }
 
-  function buildTurnOrder(count, startIndex) {
+  function buildTurnOrder(count) {
     const order = [];
     for (let i = 0; i < count; i += 1) {
-      order.push((startIndex + i) % count);
+      order.push(i);
     }
     return order;
   }
@@ -1484,8 +1479,8 @@
     }
     state.regionSelectIndex += 1;
     if (state.regionSelectIndex >= state.playerCount) {
-      state.setupStep = 'obstacles';
-      setStatus('장애물을 배치한 뒤 게임 시작을 누르세요.');
+      state.setupStep = 'ready';
+      setStatus('영역 지정이 완료되었습니다. 게임 시작을 누르세요.');
     }
     updateUiState();
     return true;
